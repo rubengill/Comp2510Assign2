@@ -92,74 +92,91 @@ int isValidInt(char *str) {
     return *endptr == '\0' || *endptr == '\n';
 }
 
-//Validate the specific dates
-
+// Check if it is a leap year 
+int isLeapYear(int year) {
+    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+}
 
 //Validate the birthday for the student 
 void validateBirthday(char *birthday, char *month, int *day, int *year, FILE *fp_out) {
     char *token;
     int tokenCount = 0;
-    int numMonth = sizeof(validMonths) / sizeof(validMonths[0]);
     int monthFound = 0;
+    int maxDay;
 
     char *validMonths[] = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
+    int numMonth = sizeof(validMonths) / sizeof(validMonths[0]);
 
-    token = strtok(token, "-");
+    token = strtok(birthday, "-");
     if (token == NULL) {
         fprintf(fp_out, "Error: Invalid birthday format\n");
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     // Compare token with valid strings in month array 
-     for (int i = 0; i < numMonth; i++) {
+    for (int i = 0; i < numMonth; i++) {
         if (strcmp(token, validMonths[i]) == 0) {
-            strncpy(month, token, 3); 
-            month[3] = '\0'; 
+            strncpy(month, token, 3);
+            month[3] = '\0';
             monthFound = 1;
-            // Don't need to check the other values 
             break;
         }
-        tokenCount++;
     }
 
     if (!monthFound) {
-        fprintf(fp_out, "Error: Month is not valid !");
+        fprintf(fp_out, "Error: Month is not valid!\n");
         exit(EXIT_FAILURE);
     }
+    tokenCount++;
 
-    token = strtok(NULL,  "-");
+    token = strtok(NULL, "-");
     // Validate the day
-    if (token == NULL || (((*day = atoi(token)) <= 0 || ((*day = atoi(token)) >= 32)))) {
-        fprintf(fp_out, "Error: Day is not valid!");
+    if (token == NULL || ((*day = atoi(token)) <= 0 || *day >= 32)) {
+        fprintf(fp_out, "Error: Day is not valid!\n");
         exit(EXIT_FAILURE);
     }
-
-    *day = (int)strtol(token, NULL, 10);
     tokenCount++;
 
-    token = strtok(NULL,  "-");
+    token = strtok(NULL, "-");
     // Validate the year
-    if (token == NULL || (((*year = atoi(token)) <= 2010 || ((*year = atoi(year)) >= 1950)))) {
-        fprintf(fp_out, "Error: Year is not valid!");
+    if (token == NULL || ((*year = atoi(token)) < 1950 || *year > 2010)) {
+        fprintf(fp_out, "Error: Year is not valid!\n");
         exit(EXIT_FAILURE);
     }
-
-    *year = (int)strtol(token, NULL, 10);
     tokenCount++;
 
-    //Check if there are more tokens
-    if(strtok(NULL, "-") != NULL) {
+    // Check if there are more tokens
+    if (strtok(NULL, "-") != NULL) {
         fprintf(fp_out, "Error: Too many tokens in the birthday line!\n");
         exit(EXIT_FAILURE);
-    }        
+    }
 
     // Check if there were less than 3 tokens, which means the format is incorrect
     if (tokenCount < 3) {
         fprintf(fp_out, "Error: Not enough tokens in the birthday string!\n");
-        exit(EXIT_FAILURE)
+        exit(EXIT_FAILURE);
+    }
+
+    // Check 
+    if (strcmp(month, "Feb") == 0) {
+        // Set the day for February if it is a leap year 
+        maxDay = isLeapYear(*year) ? 29 : 28;
+        // Set the maxDay to 30 if the month is Apr, Sep, Jun, Nov 
+    } else if (strcmp(month, "Apr") == 0 || strcmp(month, "Jun") == 0 ||
+               strcmp(month, "Sep") == 0 || strcmp(month, "Nov") == 0) {
+        maxDay = 30;
+    } else {
+        // Set the maxDay to 30 if non of the previous conditions are met 
+        maxDay = 31;
+    }
+
+    // Throw error is he day is not vaoid 
+    if (*day < 1 || *day > maxDay) {
+        fprintf(fp_out, "Error: Day is not valid for the given month!\n");
+        exit(EXIT_FAILURE);
     }
 }
 
