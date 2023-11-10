@@ -373,6 +373,12 @@ void addToList(StudentNode **head, StudentNode *newNode) {
     }
 }
 
+// Compare two students 
+int compareStudents(StudentNode *a, StudentNode *b) {
+    
+}
+
+
 // Function to print information of an international student
 void printInternationalStudent(InternationalStudent *student, FILE *fp_out) {
     fprintf(fp_out, "%s %s %s-%d-%d %s I %d\n", student -> firstName, student -> lastName, student -> month, student -> day, student -> year, student -> gpa, student -> toefl);
